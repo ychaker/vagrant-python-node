@@ -1,0 +1,81 @@
+---
+- hosts: all
+  user: vagrant
+
+  tasks:
+    - name : Update APT package cache
+      command: apt-get update
+      sudo: yes
+
+    - name: Install python-apt  (Required by ANSIBLE)
+      command: apt-get -y install python-apt
+      sudo: yes
+
+    - name: Ramove Apache2
+      apt: name={{ item }} state=absent purge=yes force=yes
+      with_items:
+        - apache2
+        - apache2-utils
+      sudo: yes
+
+    - name: Install packages
+      apt: name={{ item }} state=installed update_cache=yes cache_valid_time=3600
+      with_items:
+        - git-core
+        - postfix
+        - mailutils
+        - vim
+        - nginx
+        - curl
+        - nodejs
+        - npm
+        - build-essential
+        - redis-server
+        - libqt4-dev
+        - libqtwebkit-dev
+        - imagemagick
+        - qt4-dev-tools
+        - libqt4-dev
+        - libqt4-core
+        - libqt4-gui
+        - python-dev
+        - python-virtualenv
+        - mysql-client
+        - libmysqlclient-dev
+      sudo: yes
+
+    # Install PhantomJS
+    - name: Download PhantomJS
+      get_url: url=https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.8-linux-x86_64.tar.bz2 dest=/tmp/ validate_certs=no sha256sum=a1d9628118e270f26c4ddd1d7f3502a93b48ede334b8585d11c1c3ae7bc7163a
+
+    - name: Unarchive PhantomJS
+      unarchive: src=/tmp/phantomjs-1.9.8-linux-x86_64.tar.bz2 dest=/usr/local/bin group=root owner=root mode=0755 copy=no
+      sudo: yes
+
+    # Install specified python requirements.
+    - file: path=~/provision/python state=directory
+      sudo: no
+
+    - copy: src=./python/requirements.txt dest=~/provision/python/requirements.txt mode=775
+      sudo: no
+
+    - copy: src=./python/dependencies.sh dest=~/provision/python/dependencies.sh mode=775
+      sudo: no
+
+    - name: Installing Python dependencies
+      shell: /usr/bin/env bash ~/provision/python/dependencies.sh
+      sudo: no
+
+    # Install specified node requirements.
+    - file: path=~/provision/node state=directory
+      sudo: no
+
+    - copy: src=./node/requirements.txt dest=~/provision/node/requirements.txt mode=775
+      sudo: no
+
+    - copy: src=./node/dependencies.sh dest=~/provision/node/dependencies.sh mode=775
+      sudo: no
+
+    - name: Installing Node dependencies
+      shell: /usr/bin/env bash ~/provision/node/dependencies.sh
+      sudo: no
