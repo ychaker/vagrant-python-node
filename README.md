@@ -21,7 +21,7 @@ What you need to do:
 * [VirtualBox](https://www.virtualbox.org/)
 * [Ansible](http://www.ansible.com/)
 
-Once you have `brew` installed you can just run the following commands"
+Once you have `brew` installed you can just run the following commands:
 
 ```
 brew cask install virtualbox
@@ -41,6 +41,8 @@ mkdir pkg
 ```
 
 If you need to, change the settings in `vagrant.rb` to suit your needs (eg. memory allocation).
+
+Also, you might want to update the `requirements.txt` files under `provisioning/node` and `provisioning/python` to contain the dependencies that you need.
 
 ### Setup Vagrant Box
 

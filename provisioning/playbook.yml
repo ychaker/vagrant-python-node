@@ -40,8 +40,47 @@
         - libqt4-gui
         - python-dev
         - python-virtualenv
-        - mysql-client
         - libmysqlclient-dev
+      sudo: yes
+
+    # MySQL
+    - name: Install MySQL
+      apt: name={{ item }} state=latest
+      with_items:
+        - mysql-server
+        - mysql-client
+        - python-mysqldb
+      sudo: yes
+
+    - name: Add MySQL user
+      mysql_user: name=vagrant
+                  host={{ item }}
+                  password=vagrant priv=*.*:ALL,GRANT
+                  login_user=root
+                  login_password=
+      with_items:
+        - '%'
+        - localhost
+
+    - name: Create MySQL databases
+      mysql_db: name={{ item }}
+                state=present
+      with_items:
+        - site_development
+        - site_test
+
+    - name: Start the MySQL service
+      service: name=mysql state=started enabled=true
+
+    - file: path=/etc/mysql/conf.d state=directory
+      sudo: yes
+
+    - name: Set MySQL number of connections
+      copy: src=./mysql/max_connections.cnf dest=/etc/mysql/conf.d/max_connections.cnf
+      sudo: yes
+
+    - name: Install MySQL command line client configuration file
+      copy: src=./mysql/my.cnf dest=/home/vagrant/.my.cnf owner=vagrant group=vagrant
       sudo: yes
 
     # Install PhantomJS
